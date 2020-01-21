@@ -1,0 +1,157 @@
+---
+title: "Class 2 Participation"
+author: "Chip Galusha"
+date: "1/20/2020"
+output:
+  md_document:
+    variant: gfm
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(scipen = 999)
+
+```
+
+## Chip Galusha's Class One Participation Document
+### Intro To ggPlot2
+
+### Grammar of Graphics
+ggplot2 implements the grammar of graphics - a coherent system for describing & building graphs. 
+
+* Good grammar > 1st step for a good sentence   
+* Good graphical grammar > 1st step in a well formed or correct graphic   
+
+*ggplot2 builds up a graphic from multiple layers of data*   
+
+**Components of the Layered Gramnmar**   
+* data & aestedic mapping   
+* geometric objects  
+* scales
+* facet specification
+* statistical transformation   
+* the coordinate system   
+
+A layered grammar defines the components of a plot as:   
+* A default dataset > mapping variables to aestedices
+* One or more layer w/:
+    - one geometric object   
+    - one statistical transformation
+    - one position adjustment   
+    - and optionally a data set and aesdetic mapping
+* one scale for each aestedic mapping   
+* a coordinate system   
+* a facet specification   
+
+```{r}
+
+#install.packages("gapminder")
+library(gapminder)
+library(tidyverse)
+library(ggthemes)
+library(wesanderson)
+
+```
+
+Let's get the data ready
+
+```{r}
+data("gapminder")
+
+str(gapminder)
+```
+
+```{r}
+
+ggplot(data = gapminder, mapping = aes(x = year, y = pop, color = continent)) +
+  geom_point()
+
+```
+
+Aggregate by continent.
+
+```{r}
+gapminder %>% 
+  group_by(year, continent) %>% 
+  summarise(pop = sum(pop)) %>% 
+ggplot(data = ., mapping = aes(x = year, y = pop, color = continent)) +
+  geom_point() +
+  scale_y_log10()
+
+```
+
+```{r}
+
+gapminder %>% 
+  filter(continent == "Asia") %>% 
+ggplot(data = ., mapping = aes(x = year, y = gdpPercap, color = country)) +
+  geom_point() +
+  facet_wrap(~continent)
+  
+
+```
+
+Try two numeric values.
+
+```{r}
+
+ggplot(data = gapminder, aes(x = gdpPercap, y = lifeExp, color = continent, size = pop)) +
+  geom_point() +
+  scale_x_log10() +
+  stat_smooth(method = "lm")
+
+```
+
+Changing mapping for population.
+
+```{r}
+# this is useless but it shows how shape works
+gapminder %>% 
+  filter(continent == "Europe") %>%
+  group_by(country) %>% 
+  summarise(gdpPercap = mean(gdpPercap),
+            lifeExp = mean(lifeExp)) %>% 
+ggplot(data = ., mapping = aes(x = gdpPercap, y = lifeExp, shape = country)) +
+  geom_point() +
+  scale_x_log10() +
+  stat_smooth(method = "lm")
+```
+
+Back to square one.
+
+```{r}
+ggplot(data = gapminder, mapping = aes(x = gdpPercap, y = lifeExp)) +
+  geom_point(aes(color = continent), alpha = .4) +
+  scale_x_log10() +
+  stat_smooth(method = "lm", mapping = aes(color = continent))
+```
+
+```{r}
+ggplot(data = gapminder, mapping = aes(x = gdpPercap, y = lifeExp)) +
+  geom_point(alpha = .4) +
+  scale_x_log10() +
+  stat_smooth(method = "lm") +
+  facet_wrap(~continent) +
+  xlab("GDP per Capita") +
+  ylab("Life Expectancy") +
+  ggtitle("Life Expectancy By GDP per Capita", subtitle = " Faceted By Continent") 
+
+```
+
+Getting weird again
+
+```{r}
+
+gapminder %>% 
+ggplot(data = ., mapping = aes(x = continent, y = lifeExp)) +
+  stat_summary(fun.ymin = min,
+               fun.ymax = max, 
+               fun.y = median, 
+               alpha = .9) +
+  geom_point() +
+  coord_flip() +
+  theme_fivethirtyeight()
+
+```
+
+
